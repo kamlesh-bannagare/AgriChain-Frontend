@@ -35,7 +35,7 @@ const Cart = ({ cart, onCheckout, onRemoveItem }) => {
                     variant="outlined"
                     color="error"
                     size="small"
-                    onClick={() => onRemoveItem(index)}
+                    onClick={() => onRemoveItem(item.id)}
                   >
                     Remove
                   </Button>
@@ -73,7 +73,7 @@ const Cart = ({ cart, onCheckout, onRemoveItem }) => {
               variant="contained"
               color="primary"
               sx={{ mt: 2 }}
-              onClick={onCheckout}
+              onClick={() => onCheckout(cart.items[0].user_id)} 
             >
               Checkout
             </Button>

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Grid, 
-  Box, 
-  Typography, 
-  Button, 
+import {
+  Container,
+  Grid,
+  Box,
+  Typography,
+  Button,
   Paper,
   useMediaQuery,
   useTheme
@@ -12,14 +12,25 @@ import {
 import ProductGrid from '../components/user/ProductGrid';
 import Cart from '../components/user/Cart';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  //  Fetching the updated cart from backend and update local state
+  const fetchCarts = async () => {
+    const cartResponse = await fetch('http://localhost:8000/api/cart/1');
+    if (cartResponse.ok) {
+      const cartData = await cartResponse.json();
+      setCart(cartData);
+    } else {
+      console.error('Failed to fetch updated cart');
+    }
+  }
 
   //   get all products
   useEffect(() => {
@@ -37,18 +48,6 @@ const HomePage = () => {
       }
     };
 
-    //  Fetching the updated cart from backend and update local state
-    const fetchCarts = async () =>{
-      const cartResponse = await fetch('http://localhost:8000/api/cart/1');
-      if (cartResponse.ok) {
-        const cartData = await cartResponse.json();
-        setCart(cartData);
-      } else {
-        console.error('Failed to fetch updated cart');
-      }
-    }
-    
-
     fetchProducts();  // Call the function to fetch products
     fetchCarts();
   }, []);  // Empty dependency array to run only once on component mount
@@ -56,16 +55,16 @@ const HomePage = () => {
 
   const handleAddToCart = async (product) => {
     console.log("Product added: ", product);
-  
+
     const payload = {
-      user_id: 1, 
+      user_id: 1,
       item_id: product.id,
       item: product.item,
       unit_price: product.unit_price,
       no_of_units_for_offer: product.no_of_units_for_offer,
       special_price_on_offer: product.special_price_on_offer
     };
-  
+
     try {
       const response = await fetch('http://localhost:8000/api/cart/', {
         method: 'POST',
@@ -74,16 +73,16 @@ const HomePage = () => {
         },
         body: JSON.stringify(payload)
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to add to cart');
       }
-  
+
       // Parsing response
       const result = await response.json();
       console.log("Item added to backend cart:", result);
-  
-      //  Fetching the updated cart from backend and update local state
+
+      //  Fetching the updated cart from backend
       const cartResponse = await fetch('http://localhost:8000/api/cart/1');
       if (cartResponse.ok) {
         const cartData = await cartResponse.json();
@@ -91,19 +90,55 @@ const HomePage = () => {
       } else {
         console.error('Failed to fetch updated cart');
       }
-  
+
     } catch (error) {
       console.error("Error adding to cart:", error);
     }
   };
-  
-  const handleRemoveItem = (index) => {
-    setCart(cart.filter((_, i) => i !== index));
+
+  // Remove the Item fron the cart
+  const handleRemoveItem = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/cart/${id}/`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await fetchCarts()
+
+      } else {
+        console.error('Failed to delete item from server');
+      }
+    } catch (error) {
+      console.error('Error while deleting item:', error);
+    }
   };
 
-  const handleCheckout = () => {
-    setCart([]);                   
-    navigate('/checkout');        
+
+  const handleCheckout = async (user_id) => {
+    console.log("user_id for deleting the items: ", user_id)
+    const payload = {
+      user_id: user_id,
+    };
+    try {
+      const response = await fetch('http://localhost:8000/api/cart/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (response.ok) {
+        setCart([]);
+        navigate('/checkout');
+      } else {
+        console.error("Failed to delete checkout items from server.")
+      }
+    }
+    catch
+    (error) {
+      console.error('Error while deleting item:', error);
+    }
   };
 
   return (
@@ -134,9 +169,9 @@ const HomePage = () => {
                 <Typography variant="h5" component="p" gutterBottom sx={{ mb: 3 }}>
                   Direct from local farmers to your table
                 </Typography>
-                <Button 
-                  variant="contained" 
-                  color="secondary" 
+                <Button
+                  variant="contained"
+                  color="secondary"
                   size="large"
                   href="#products"
                   sx={{ fontWeight: 600 }}
@@ -176,18 +211,18 @@ const HomePage = () => {
           <Grid item xs={12} md={4} lg={3}>
             {!isMobile && (
               <Box position="sticky" top={80}>
-                <Cart 
-                  cart={cart} 
-                  onCheckout={handleCheckout} 
-                  onRemoveItem={handleRemoveItem} 
+                <Cart
+                  cart={cart}
+                  onCheckout={handleCheckout}
+                  onRemoveItem={handleRemoveItem}
                 />
               </Box>
             )}
             {isMobile && (
-              <Cart 
-                cart={cart} 
-                onCheckout={handleCheckout} 
-                onRemoveItem={handleRemoveItem} 
+              <Cart
+                cart={cart}
+                onCheckout={handleCheckout}
+                onRemoveItem={handleRemoveItem}
               />
             )}
           </Grid>
