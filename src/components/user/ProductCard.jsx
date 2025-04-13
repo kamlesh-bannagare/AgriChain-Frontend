@@ -20,6 +20,7 @@ const ProductCard = ({ product, onAddToCart }) => {
 
   let discountPercentage = 0;
 
+  // calculate discount Percentage for the product
   if (number_of_units > 0) {
     discountPercentage = Math.round(
       ((number_of_units * unit_price - special_offer) /

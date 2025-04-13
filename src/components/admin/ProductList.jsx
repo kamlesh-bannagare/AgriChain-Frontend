@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Typography } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
-const ProductList = ({ products, onEdit, onDelete }) => {
+const ProductList = ({ products, onDelete }) => {
   return (
     <Paper elevation={3} sx={{ p: 2 }}>
       <Typography variant="h6" gutterBottom>
@@ -26,9 +26,6 @@ const ProductList = ({ products, onEdit, onDelete }) => {
                 <TableCell>{product.no_of_units_for_offer}</TableCell>
                 <TableCell>{product.special_price_on_offer}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => onEdit(product)} color="primary">
-                    <Edit />
-                  </IconButton>
                   <IconButton onClick={() => onDelete(product.id)} color="error">
                     <Delete />
                   </IconButton>

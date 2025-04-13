@@ -21,18 +21,7 @@ const HomePage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  //  Fetching the updated cart from backend and update local state
-  const fetchCarts = async () => {
-    const cartResponse = await fetch('http://localhost:8000/api/cart/1');
-    if (cartResponse.ok) {
-      const cartData = await cartResponse.json();
-      setCart(cartData);
-    } else {
-      console.error('Failed to fetch updated cart');
-    }
-  }
-
-  //   get all products
+  //   get all products-----------------------------------------------------------------------------------------------------
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -53,6 +42,18 @@ const HomePage = () => {
   }, []);  // Empty dependency array to run only once on component mount
 
 
+  //  Fetching the updated cart from backend ------------------------------------------------------------------------------
+  const fetchCarts = async () => {
+    const cartResponse = await fetch('http://localhost:8000/api/cart/1');
+    if (cartResponse.ok) {
+      const cartData = await cartResponse.json();
+      setCart(cartData);
+    } else {
+      console.error('Failed to fetch updated cart');
+    }
+  }
+
+// adding the product into the cart ---------------------------------------------------------------------------------------------
   const handleAddToCart = async (product) => {
     console.log("Product added: ", product);
 
@@ -73,30 +74,24 @@ const HomePage = () => {
         },
         body: JSON.stringify(payload)
       });
-
+      // if response is ok then fetch the updated cart data.
       if (!response.ok) {
         throw new Error('Failed to add to cart');
+      }
+      else {
+        await fetchCarts()
       }
 
       // Parsing response
       const result = await response.json();
       console.log("Item added to backend cart:", result);
 
-      //  Fetching the updated cart from backend
-      const cartResponse = await fetch('http://localhost:8000/api/cart/1');
-      if (cartResponse.ok) {
-        const cartData = await cartResponse.json();
-        setCart(cartData);
-      } else {
-        console.error('Failed to fetch updated cart');
-      }
-
     } catch (error) {
       console.error("Error adding to cart:", error);
     }
   };
 
-  // Remove the Item fron the cart
+  // Remove the single Item fron the cart---------------------------------------------------------------------------
   const handleRemoveItem = async (id) => {
     try {
       const response = await fetch(`http://localhost:8000/api/cart/${id}/`, {
@@ -114,7 +109,7 @@ const HomePage = () => {
     }
   };
 
-
+  // removing all items from the cart after checkout ------------------------------------------------------------------------
   const handleCheckout = async (user_id) => {
     console.log("user_id for deleting the items: ", user_id)
     const payload = {

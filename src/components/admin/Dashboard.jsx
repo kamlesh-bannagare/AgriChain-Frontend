@@ -5,9 +5,8 @@ import ProductList from './ProductList';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
-  const [editingProduct, setEditingProduct] = useState(null);
 
-//   get all products
+  //   get all products first -------------------------------------------------------------------------------------
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -26,8 +25,8 @@ const Dashboard = () => {
     fetchProducts();  // Call the function to fetch products
   }, []);  // Empty dependency array to run only once on component mount
 
-console.log("products: ", products)
-//   add product------------------------------------------------------------------------------------
+  console.log("products: ", products)
+  //   add product------------------------------------------------------------------------------------
   const handleAddProduct = async (product) => {
     console.log("adding product: ", product)
     try {
@@ -45,7 +44,7 @@ console.log("products: ", products)
         }),
       });
 
-  
+
       if (response.ok) {
         const savedProduct = await response.json();
         setProducts((prev) => [...prev, savedProduct]);
@@ -58,44 +57,8 @@ console.log("products: ", products)
       console.error('Error while adding product:', error);
     }
   };
-  
 
-// Edit product function
-const handleEdit = (product) => {
-    console.log("in edit product: ", product)
-    setEditingProduct(product);  // Set the selected product to be edited
-  };
-
-  // Update product function
-  const handleUpdateProduct = async (updatedProduct) => {
-    console.log("update Product: ", updatedProduct)
-    try {
-      const response = await fetch(`http://localhost:8000/api/product/${updatedProduct.id}/`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          item: updatedProduct.item,
-          unit_price: updatedProduct.unit_price,
-          no_of_units_for_offer: updatedProduct.no_of_units_for_offer,
-          special_price_on_offer: updatedProduct.special_price_on_offer,
-        }),
-      });
-
-      if (response.ok) {
-        const savedProduct = await response.json();
-        setProducts(products.map(p => p.id === updatedProduct.id ? savedProduct : p));  // Update product list
-        setEditingProduct(null);  // Clear editing state
-      } else {
-        console.error('Failed to update product:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error while updating product:', error);
-    }
-  };
-
-  // Delete product function
+  // Delete product function--------------------------------------------------------------------------------------------------------
   const handleDelete = async (id) => {
     console.log("id: ", id)
     try {
@@ -118,15 +81,12 @@ const handleEdit = (product) => {
       <Typography variant="h4" gutterBottom sx={{ mt: 3, mb: 3 }}>
         Admin Dashboard
       </Typography>
-      <ProductForm 
-        onAddProduct={handleAddProduct} 
-        onUpdateProduct={handleUpdateProduct}
-        editingProduct={editingProduct}
+      <ProductForm
+        onAddProduct={handleAddProduct}
       />
-      <ProductList 
-        products={products} 
-        onEdit={handleEdit} 
-        onDelete={handleDelete} 
+      <ProductList
+        products={products}
+        onDelete={handleDelete}
       />
     </Container>
   );
